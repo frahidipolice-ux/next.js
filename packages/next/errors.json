@@ -1088,5 +1088,16 @@
   "1087": "Failed to parse \"%s\":\\n%s%s",
   "1088": "Expected RSC navigation response to have a body",
   "1089": "\\`experimental.cachedNavigations\\` requires \\`cacheComponents\\` to be enabled. Please update your %s accordingly.",
-  "1090": "`css.lightning.featureNamesToMask` is not supported by the wasm bindings."
+  "1090": "`css.lightning.featureNamesToMask` is not supported by the wasm bindings.",
+  "1091": "Worker pool is ending, no more calls can be made",
+  "1092": "Worker exited with code %s%s",
+  "1093": "This file must be run as a worker thread",
+  "1094": "Worker pool closed",
+  "1095": "Child can only be used on a forked process",
+  "1096": "Error when calling setup: %s",
+  "1097": "Worker pool ended before task could be processed",
+  "1098": "\"null\" or \"undefined\" thrown",
+  "1099": "Unexpected request from parent process: %s",
+  "1100": "Worker exited unexpectedly with code %s, signal %s",
+  "1101": "Worker restarted due to timeout"
 }
