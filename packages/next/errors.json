@@ -1102,5 +1102,6 @@
   "1101": "Worker restarted due to timeout",
   "1102": "maxBootingWorkers must be at least 1",
   "1103": "Worker exited during shutdown",
-  "1104": "Worker pool ended while requests were in-flight"
+  "1104": "Worker pool ended while requests were in-flight",
+  "1105": "Worker is ended, no more calls can be done to it"
 }
