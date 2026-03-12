@@ -2,10 +2,13 @@
   "compilerOptions": {
     "module": "commonjs",
     "sourceMap": true,
+    "strict": false,
     "esModuleInterop": true,
     "target": "ES2022",
     "downlevelIteration": true,
-    "preserveWatchOutput": true
+    "ignoreDeprecations": "6.0",
+    "preserveWatchOutput": true,
+    "types": ["node"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "transforms/__testfixtures__/**"]
