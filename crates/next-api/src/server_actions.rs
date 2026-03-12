@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use bincode::{Decode, Encode};
 use next_core::{
     next_manifests::{ActionLayer, ActionManifestWorkerEntry, ServerReferenceManifest},
@@ -10,7 +10,10 @@ use turbo_tasks_fs::{self, File, FileContent, FileSystem, FileSystemPath, Virtua
 use turbopack_core::{
     self,
     asset::AssetContent,
-    chunk::{AsyncModuleInfo, ChunkItem, ChunkableModule, ChunkingContext, EvaluatableAsset},
+    chunk::{
+        AsyncModuleInfo, ChunkItem, ChunkableModule, ChunkingContext, ChunkingType,
+        EvaluatableAsset,
+    },
     emit_collect::{CollectingModule, EmittedModuleReference},
     ident::AssetIdent,
     module::{Module, ModuleSideEffects, Modules},
@@ -89,6 +92,10 @@ async fn collect_actions(
             .into_iter()
             .flatten()
             .map(async |(data, module, _)| {
+                let namespace = match &data.chunking_type {
+                    ChunkingType::Collected { merge_tag, .. } => merge_tag,
+                    _ => bail!("unexpected chunking type for collected reference"),
+                };
                 let data =
                     ResolvedVc::try_sidecast::<Box<dyn EmittedModuleReference>>(data.reference)
                         .context(
@@ -107,7 +114,13 @@ async fn collect_actions(
                 Ok((
                     hash.to_string(),
                     (
-                        ActionLayer::ActionBrowser, // TODO
+                        match namespace.as_str() {
+                            "next/server-actions" => ActionLayer::Rsc,
+                            "next/server-actions/edge" | "next/server-actions/node" => {
+                                ActionLayer::ActionBrowser
+                            }
+                            _ => bail!("unexpected namespace {namespace} for collected reference"),
+                        },
                         ActionMeta {
                             name: name.to_string(),
                             source_path: "".to_string(), // TODO
