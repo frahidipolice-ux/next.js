@@ -3434,7 +3434,7 @@ export default async function build(
                   fallbackExpire: fallbackCacheControl?.expire,
                   fallbackStatus: meta.status,
                   fallbackHeaders: meta.headers,
-                  fallbackRootParams: fallback
+                  fallbackRootParams: route.fallbackRouteParams
                     ? route.fallbackRootParams
                     : undefined,
                   fallbackSourceRoute:
