@@ -13,7 +13,7 @@ use turbo_rcstr::{RcStr, rcstr};
 use turbo_tasks::{ResolvedVc, ValueToString, Vc, turbobail};
 use turbo_tasks_fs::FileSystemPath;
 use turbopack_core::{
-    chunk::{ChunkingContext, ChunkingType, ChunkingTypeOption, ModuleChunkItemIdExt},
+    chunk::{ChunkingContext, ChunkingTypeOption, ModuleChunkItemIdExt},
     issue::{
         Issue, IssueExt, IssueSeverity, IssueSource, IssueStage, OptionIssueSource,
         OptionStyledString, StyledString,
@@ -46,7 +46,7 @@ use crate::{
             EsmExport,
             export::{all_known_export_names, is_export_missing},
         },
-        util::throw_module_not_found_expr,
+        util::{chunking_type_from_annotation, throw_module_not_found_expr},
     },
     runtime_functions::{TURBOPACK_EXTERNAL_IMPORT, TURBOPACK_EXTERNAL_REQUIRE, TURBOPACK_IMPORT},
     tree_shake::{TURBOPACK_PART_IMPORT_SOURCE, part::module::EcmascriptModulePartAsset},
@@ -503,25 +503,11 @@ impl ModuleReference for EsmAssetReference {
 
     #[turbo_tasks::function]
     fn chunking_type(&self) -> Result<Vc<ChunkingTypeOption>> {
-        Ok(Vc::cell(
-            if let Some(chunking_type) = self.annotations.chunking_type() {
-                if chunking_type == "parallel" {
-                    Some(ChunkingType::Parallel {
-                        inherit_async: true,
-                        hoisted: true,
-                    })
-                } else if chunking_type == "none" {
-                    None
-                } else {
-                    bail!("unknown chunking_type: {}", chunking_type.to_string_lossy());
-                }
-            } else {
-                Some(ChunkingType::Parallel {
-                    inherit_async: true,
-                    hoisted: true,
-                })
-            },
-        ))
+        Ok(Vc::cell(chunking_type_from_annotation(
+            self.annotations.chunking_type().and_then(|v| v.as_str()),
+            true,
+            true,
+        )?))
     }
 
     #[turbo_tasks::function]

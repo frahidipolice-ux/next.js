@@ -314,6 +314,15 @@ pub struct ImportAttributes {
     /// const { b } = await import(/* turbopackExports: "b" */ "module");
     /// ```
     pub export_names: Option<SmallVec<[RcStr; 1]>>,
+    /// Whether to use a specific chunking type for this import.
+    //
+    /// This is set by using a or `turbopackChunkingType` comment.
+    ///
+    /// Example:
+    /// ```js
+    /// const a = require(/* turbopackChunkingType: parallel */ "a");
+    /// ```
+    pub chunking_type: Option<RcStr>,
 }
 
 impl ImportAttributes {
@@ -322,6 +331,7 @@ impl ImportAttributes {
             ignore: false,
             optional: false,
             export_names: None,
+            chunking_type: None,
         }
     }
 
@@ -900,6 +910,7 @@ fn parse_directives(
     let mut ignore = None;
     let mut optional = None;
     let mut export_names = None;
+    let mut chunking_type = None;
 
     // Process all comments, last one wins for each directive type
     for comment in leading_comments.iter() {
@@ -919,17 +930,21 @@ fn parse_directives(
                 "webpackExports" | "turbopackExports" => {
                     export_names = Some(parse_export_names(val));
                 }
+                "turbopackChunkingType" => {
+                    chunking_type = Some(RcStr::from(val));
+                }
                 _ => {} // ignore anything else
             }
         }
     }
 
     // Return Some only if at least one directive was found
-    if ignore.is_some() || optional.is_some() || export_names.is_some() {
+    if ignore.is_some() || optional.is_some() || export_names.is_some() || chunking_type.is_some() {
         Some(ImportAttributes {
             ignore: ignore.unwrap_or(false),
             optional: optional.unwrap_or(false),
             export_names,
+            chunking_type,
         })
     } else {
         None

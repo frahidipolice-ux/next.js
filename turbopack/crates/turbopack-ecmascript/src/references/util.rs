@@ -1,10 +1,11 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 use swc_core::{ecma::ast::Expr, quote};
 use turbo_rcstr::{RcStr, rcstr};
 use turbo_tasks::{ResolvedVc, Vc, turbofmt};
 use turbo_tasks_fs::FileSystemPath;
 use turbopack_core::{
     self,
+    chunk::ChunkingType,
     issue::{
         Issue, IssueExt, IssueSeverity, IssueSource, IssueStage, OptionIssueSource,
         OptionStyledString, StyledString,
@@ -131,4 +132,34 @@ impl Issue for TooManyMatchesWarning {
     fn source(&self) -> Vc<OptionIssueSource> {
         Vc::cell(Some(self.source))
     }
+}
+
+pub fn chunking_type_from_annotation(
+    annotation: Option<impl AsRef<str>>,
+    inherit_async: bool,
+    hoisted: bool,
+) -> Result<Option<ChunkingType>> {
+    Ok(if let Some(chunking_type) = annotation {
+        let chunking_type = chunking_type.as_ref();
+        if chunking_type == "parallel" {
+            Some(ChunkingType::Parallel {
+                inherit_async,
+                hoisted,
+            })
+        } else if chunking_type == "shared" {
+            Some(ChunkingType::Shared {
+                inherit_async,
+                merge_tag: None,
+            })
+        } else if chunking_type == "none" {
+            None
+        } else {
+            bail!("unknown chunking_type: {chunking_type}");
+        }
+    } else {
+        Some(ChunkingType::Parallel {
+            inherit_async,
+            hoisted,
+        })
+    })
 }

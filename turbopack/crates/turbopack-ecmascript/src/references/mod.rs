@@ -2252,6 +2252,7 @@ where
                         Request::parse(pat).to_resolved().await?,
                         issue_source(source, span),
                         error_mode,
+                        attributes.chunking_type.clone(),
                     ),
                     ast_path.to_vec().into(),
                 );
@@ -2305,6 +2306,7 @@ where
                         Request::parse(pat).to_resolved().await?,
                         issue_source(source, span),
                         error_mode,
+                        attributes.chunking_type.clone(),
                     ),
                     ast_path.to_vec().into(),
                 );
