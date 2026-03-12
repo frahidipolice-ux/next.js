@@ -3269,13 +3269,13 @@ fn emit_server_action(
         } else {
             vec![
                 quote!(
-                    "$emit($req, {namespace:'next/server-actions', data: $data, with: { 'turbopack-transition': 'next-rsc' }});" as Stmt,
+                    "$emit($req, {namespace:'next/server-actions/node', data: $data, with: { 'turbopack-transition': 'next-rsc' }});" as Stmt,
                     emit = emit.clone(),
                     req: Expr = req.clone(),
                     data: Expr = data.clone()
                 ),
                 quote!(
-                    "$emit($req, {namespace:'next/server-actions', data: $data, with: { 'turbopack-transition': 'next-edge-rsc' }});" as Stmt,
+                    "$emit($req, {namespace:'next/server-actions/edge', data: $data, with: { 'turbopack-transition': 'next-edge-rsc' }});" as Stmt,
                     emit = emit,
                     req: Expr = req,
                     data: Expr = data,

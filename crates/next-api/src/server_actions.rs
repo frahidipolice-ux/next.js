@@ -31,14 +31,14 @@ use turbopack_ecmascript::chunk::{
 /// loader.
 #[turbo_tasks::function]
 pub(crate) async fn create_server_actions_manifest(
-    server_action_loader: Vc<Box<dyn Module>>,
+    server_action_loader_modules: Vc<Modules>,
     node_root: FileSystemPath,
     page_name: RcStr,
     runtime: NextRuntime,
     module_graph: Vc<ModuleGraph>,
     chunking_context: Vc<Box<dyn ChunkingContext>>,
 ) -> Vc<Box<dyn OutputAsset>> {
-    let actions = collect_actions(server_action_loader, module_graph);
+    let actions = collect_actions(server_action_loader_modules, module_graph);
     build_manifest(
         node_root,
         page_name,
@@ -51,23 +51,38 @@ pub(crate) async fn create_server_actions_manifest(
 
 #[turbo_tasks::function]
 async fn collect_actions(
-    server_action_loader: ResolvedVc<Box<dyn Module>>,
+    server_action_loader_modules: Vc<Modules>,
     module_graph: Vc<ModuleGraph>,
 ) -> Result<Vc<AllActions>> {
     // This mirrors what the ServerActionCollectModule ends up chunking into the chunk.
     let collected_modules = module_graph.collected_modules().await?;
-    // This can be none if there are no server actions
-    let actions =
-        collected_modules
-            .collected_references
+
+    let server_action_loader_modules = server_action_loader_modules.await?;
+
+    println!(
+        "server_action_loader_modules: {:#?}",
+        server_action_loader_modules
             .iter()
-            .find_map(|((entry, loader), actions)| {
-                if *entry == server_action_loader && *loader == server_action_loader {
-                    Some(actions)
-                } else {
-                    None
-                }
-            });
+            .map(|m| m.ident_string())
+            .try_join()
+            .await?
+    );
+
+    // This can be none if there are no server actions
+    let actions = collected_modules.collected_references.iter().find_map(
+        |((_entry_modules, loader), actions)| {
+            // No need to check entry_modules. Each page (ChunkGroup::Entry) has its own loader
+            // module anyway.
+
+            // server_action_loader_modules contains only 2 modules, so converting that into a
+            // hashset for quicker lookup is not necessary.
+            if server_action_loader_modules.contains(loader) {
+                Some(actions)
+            } else {
+                None
+            }
+        },
+    );
 
     Ok(Vc::cell(
         actions
