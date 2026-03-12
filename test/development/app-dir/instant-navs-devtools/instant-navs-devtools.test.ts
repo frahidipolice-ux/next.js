@@ -60,11 +60,16 @@ describe('instant-nav-panel', () => {
     await clearInstantModeCookie(browser)
     await browser.waitForElementByCss('[data-testid="home-title"]')
 
-    // Wait for initial compilation to settle
-    await retry(async () => {
-      const status = await getBadgeStatus(browser)
-      expect(status).toBe('none')
-    })
+    // Wait for initial compilation to settle (tsconfig creation triggers
+    // Fast Refresh so the badge may stay in a transient state for a while)
+    await retry(
+      async () => {
+        const status = await getBadgeStatus(browser)
+        expect(status).toBe('none')
+      },
+      10_000,
+      500
+    )
 
     await openInstantNavPanel(browser)
 
@@ -89,10 +94,14 @@ describe('instant-nav-panel', () => {
     await browser.waitForElementByCss('[data-testid="home-title"]')
 
     // Wait for initial compilation to settle (tsconfig creation triggers Fast Refresh)
-    await retry(async () => {
-      const status = await getBadgeStatus(browser)
-      expect(status).toBe('none')
-    })
+    await retry(
+      async () => {
+        const status = await getBadgeStatus(browser)
+        expect(status).toBe('none')
+      },
+      10_000,
+      500
+    )
 
     await openInstantNavPanel(browser)
 
@@ -102,7 +111,7 @@ describe('instant-nav-panel', () => {
     // Cookie should now be set
     await retry(async () => {
       const cookie = await browser.eval(() => document.cookie)
-      expect(cookie).toContain('next-instant-navigation-testing=1')
+      expect(cookie).toMatch(/next-instant-navigation-testing=\d+/)
     })
 
     // Panel should show client-nav-waiting state
