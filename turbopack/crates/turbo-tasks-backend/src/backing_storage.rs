@@ -103,6 +103,10 @@ pub trait BackingStorageSealed: 'static + Send + Sync {
         category: SpecificTaskDataCategory,
     ) -> Result<Vec<TaskStorage>>;
 
+    fn compact(&self) -> Result<bool> {
+        Ok(false)
+    }
+
     fn shutdown(&self) -> Result<()> {
         Ok(())
     }
@@ -214,6 +218,10 @@ where
                 unsafe { this.batch_lookup_data(tx, task_ids, category) }
             }
         }
+    }
+
+    fn compact(&self) -> Result<bool> {
+        either::for_both!(self, this => this.compact())
     }
 
     fn shutdown(&self) -> Result<()> {

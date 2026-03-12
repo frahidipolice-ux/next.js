@@ -507,6 +507,10 @@ impl<T: KeyValueDatabase + Send + Sync + 'static> BackingStorageSealed
             })
     }
 
+    fn compact(&self) -> Result<bool> {
+        self.inner.database.compact()
+    }
+
     fn shutdown(&self) -> Result<()> {
         self.inner.database.shutdown()
     }
