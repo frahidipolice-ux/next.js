@@ -58,12 +58,14 @@ export function InstantNavsPanel() {
   }, [state.page, status, dispatch])
 
   function handleReload() {
-    document.cookie = 'next-instant-navigation-testing=1; path=/'
+    const instantCookieValue = `c${performance.now()}`
+    document.cookie = `next-instant-navigation-testing=${instantCookieValue}; path=/`
     window.location.reload()
   }
 
   function handleStartClientNav() {
-    document.cookie = 'next-instant-navigation-testing=1; path=/'
+    const instantCookieValue = `c${performance.now()}`
+    document.cookie = `next-instant-navigation-testing=${instantCookieValue}; path=/`
     fromUrlRef.current = window.location.pathname + window.location.search
     initialPageRef.current = state.page
     dispatch({

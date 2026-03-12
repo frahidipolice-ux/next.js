@@ -92,7 +92,7 @@ describe('instant-nav-panel', () => {
     // Cookie should now be set
     await retry(async () => {
       const cookie = await browser.eval(() => document.cookie)
-      expect(cookie).toContain('next-instant-navigation-testing=1')
+      expect(cookie).toMatch(/next-instant-navigation-testing=c\d+/)
     })
 
     // Panel should show client-nav-waiting state
