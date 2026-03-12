@@ -15,7 +15,6 @@ export function InstantNavsPanel() {
       ? window.location.pathname + window.location.search
       : ''
   )
-  const initialPageRef = useRef<string>(state.page)
 
   // Cleanup on unmount: clear cookie and reset state
   useEffect(() => {
@@ -36,26 +35,35 @@ export function InstantNavsPanel() {
     }
   }, [dispatch])
 
-  // Navigation detection: watch state.page for changes while in client-nav-waiting state
+  // Navigation detection: watch for route changes while the panel is armed.
   useEffect(() => {
     if (status !== 'client-nav-waiting') return
-    if (!state.page) return
 
-    // Capture the first non-empty page as baseline (state.page starts as '')
-    if (!initialPageRef.current) {
-      initialPageRef.current = state.page
-      return
-    }
+    const fromUrl = fromUrlRef.current
+    const checkForNavigation = () => {
+      const toUrl = window.location.pathname + window.location.search
+      if (toUrl === fromUrl) {
+        return
+      }
 
-    if (state.page !== initialPageRef.current) {
       dispatch({
         type: ACTION_INSTANT_NAVS_SET_STATUS,
         status: 'client-nav',
-        fromUrl: fromUrlRef.current,
-        toUrl: window.location.pathname + window.location.search,
+        fromUrl,
+        toUrl,
       })
     }
-  }, [state.page, status, dispatch])
+
+    checkForNavigation()
+
+    const interval = window.setInterval(checkForNavigation, 100)
+    window.addEventListener('popstate', checkForNavigation)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('popstate', checkForNavigation)
+    }
+  }, [status, dispatch])
 
   function handleReload() {
     document.cookie = 'next-instant-navigation-testing=1; path=/'
@@ -65,7 +73,6 @@ export function InstantNavsPanel() {
   function handleStartClientNav() {
     document.cookie = 'next-instant-navigation-testing=1; path=/'
     fromUrlRef.current = window.location.pathname + window.location.search
-    initialPageRef.current = state.page
     dispatch({
       type: ACTION_INSTANT_NAVS_SET_STATUS,
       status: 'client-nav-waiting',
