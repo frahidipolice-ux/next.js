@@ -117,7 +117,6 @@ export default async function TargetPage({
           marginTop: '1.5rem',
         }}
       >
-        {/* Server Components (left column) */}
         <div
           style={{
             background: '#fafafa',
@@ -219,7 +218,6 @@ export default async function TargetPage({
           </Box>
         </div>
 
-        {/* Client Components (right column) */}
         <div
           style={{
             background: '#fafafa',
@@ -240,26 +238,15 @@ export default async function TargetPage({
           >
             Client Components
           </h2>
-
           <ClientFeatures />
         </div>
       </div>
 
-      <nav style={{ marginTop: '1.5rem' }}>
-        <Link
-          href="/"
-          style={{
-            display: 'inline-block',
-            padding: '0.5rem 1rem',
-            background: '#0070f3',
-            color: '#fff',
-            borderRadius: 6,
-            textDecoration: 'none',
-          }}
-        >
-          &larr; Back to home
+      <div style={{ marginTop: '2rem' }}>
+        <Link href="/" style={{ color: '#0070f3', textDecoration: 'none' }}>
+          ← Back home
         </Link>
-      </nav>
+      </div>
     </div>
   )
 }
